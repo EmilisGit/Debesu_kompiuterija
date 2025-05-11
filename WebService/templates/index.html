@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YOLO Object Detector</title>
+    <style>
+        img {
+            max-width: 400px;
+            margin-top: 20px;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Upload an Image</h1>
+
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" name="image" id="imageInput" required>
+        <input type="submit" value="Detect">
+    </form>
+
+    <img id="preview" src="#" style="display: none;"/>
+
+    <h2>Detected Objects:</h2>
+    <ul id="resultList"></ul>
+
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const preview = document.getElementById('preview');
+        const uploadForm = document.getElementById('uploadForm');
+        const resultList = document.getElementById('resultList');
+
+        imageInput.addEventListener('change', function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        uploadForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const formData = new FormData(uploadForm);
+         
+            fetch('/', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                resultList.innerHTML = '';
+
+                if (data.objects.objects) {
+                    data.objects.objects.forEach(function (object) {
+                        const li = document.createElement('li');
+                        li.textContent = object;
+                        resultList.appendChild(li);
+                    });
+                } else {
+                    resultList.innerHTML = '<li>No objects detected</li>';
+                }
+            })
+            .catch(error => {
+                resultList.innerHTML = '<li>Error processing the image.</li>';
+                console.error('Error:', error);
+            });
+        });
+    </script>
+</body>
+</html>

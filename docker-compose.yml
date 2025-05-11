@@ -1,0 +1,21 @@
+services:
+  model:
+    build:
+      context: ./Model
+    networks:
+      - yolonet
+
+  web:
+    build:
+      context: ./WebService
+    ports:
+      - "5001:5001"
+    networks:
+      - yolonet
+    depends_on:
+      - model
+    environment:
+      - YOLO_MODEL_URL=http://model:5000
+
+networks:
+  yolonet:
